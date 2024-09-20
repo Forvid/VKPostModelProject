@@ -38,3 +38,30 @@ class WallServiceTest {
         assertFalse(result, "Обновление должно завершиться неудачей для несуществующего поста")
     }
 }
+
+@Test
+fun testAddWithZeroId() {
+    val post = Post(id = 0, ownerId = 100, fromId = 200, date = 1663157200, text = "Пост с id 0")
+    val addedPost = WallService.add(post)
+
+    assertTrue(addedPost.id > 0, "ID поста должен быть уникальным и больше 0")
+}
+
+@Test
+fun testUpdateNonExistentPost() {
+    val post = Post(id = 999, ownerId = 100, fromId = 200, date = 1663157200, text = "Пост с несуществующим ID")
+    val result = WallService.update(post)
+
+    assertFalse(result, "Обновление поста с несуществующим ID должно вернуть false")
+}
+
+@Test
+fun testAddWithEmptyText() {
+    val post = Post(id = 0, ownerId = 100, fromId = 200, date = 1663157200, text = "")
+    val addedPost = WallService.add(post)
+
+    assertTrue(addedPost.text.isEmpty(), "Текст поста должен остаться пустым")
+}
+
+
+
