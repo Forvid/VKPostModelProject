@@ -68,4 +68,24 @@ class WallServiceTest {
 
         assertEquals("", addedPost.text, "Текст поста должен остаться пустым")
     }
+
+    @Test
+    fun testRemovePost() {
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост для удаления", friendsOnly = false)
+        val addedPost = WallService.add(post)
+
+        val result = WallService.remove(addedPost.id)
+
+        assertTrue(result, "Пост должен быть успешно удален")
+        assertFalse(WallService.getPosts().any { it.id == addedPost.id }, "Пост не должен существовать после удаления")
+    }
+
+    @Test
+    fun testRemoveNonExistentPost() {
+        WallService.clear()  // Очищаем перед тестом
+        val result = WallService.remove(999)
+
+        assertFalse(result, "Удаление несуществующего поста должно вернуть false")
+    }
 }

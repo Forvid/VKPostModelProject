@@ -62,6 +62,17 @@ object WallService {
         return false
     }
 
+    // Метод удаления поста
+    fun remove(postId: Int): Boolean {
+        val postIndex = posts.indexOfFirst { it.id == postId }
+        return if (postIndex >= 0) {
+            posts = posts.filterIndexed { index, _ -> index != postIndex }.toTypedArray()
+            true
+        } else {
+            false
+        }
+    }
+
     // Получение всех постов
     fun getPosts(): Array<Post> = posts
 
@@ -91,6 +102,10 @@ fun main() {
     println("\nОбновление поста:")
     println("Успешно обновлено: $updateResult")
 
-    println("\nВсе посты:")
+    // Пример удаления поста
+    val removeResult = WallService.remove(addedPost1.id)
+    println("\nУдаление поста с ID ${addedPost1.id}: Успешно удалено: $removeResult")
+
+    println("\nВсе посты после удаления:")
     WallService.getPosts().forEach { println(it) }
 }
