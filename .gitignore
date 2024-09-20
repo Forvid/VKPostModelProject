@@ -1,0 +1,12 @@
+# Ignore Gradle build directory
+/build/
+
+# Ignore IntelliJ IDEA specific files
+/.idea/
+*.iml
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
