@@ -1,14 +1,16 @@
+package main
+
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
-import main.*
+import kotlin.test.assertEquals
 
 class WallServiceTest {
 
     @Test
     fun testAdd() {
-        val post = Post(id = 0, ownerId = 100, fromId = 200, date = 1663157200, text = "Тестовый пост")
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост", friendsOnly = false)
         val addedPost = WallService.add(post)
 
         assertTrue(addedPost.id > 0, "Пост должен получить уникальный идентификатор")
@@ -17,7 +19,8 @@ class WallServiceTest {
 
     @Test
     fun testUpdateSuccess() {
-        val post = Post(id = 0, ownerId = 100, fromId = 200, date = 1663157200, text = "Тестовый пост")
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост", friendsOnly = false)
         val addedPost = WallService.add(post)
 
         val updatedPost = addedPost.copy(text = "Обновленный текст")
@@ -29,39 +32,40 @@ class WallServiceTest {
 
     @Test
     fun testUpdateFail() {
-        val post = Post(id = 0, ownerId = 100, fromId = 200, date = 1663157200, text = "Тестовый пост")
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост", friendsOnly = false)
         WallService.add(post)
 
-        val nonExistentPost = Post(id = 999, ownerId = 100, fromId = 200, date = 1663157200, text = "Не существующий пост")
+        val nonExistentPost = Post(id = 999, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Не существующий пост", friendsOnly = false)
         val result = WallService.update(nonExistentPost)
 
         assertFalse(result, "Обновление должно завершиться неудачей для несуществующего поста")
     }
+
+    @Test
+    fun testAddWithZeroId() {
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Пост с id 0", friendsOnly = false)
+        val addedPost = WallService.add(post)
+
+        assertTrue(addedPost.id > 0, "ID поста должен быть уникальным и больше 0")
+    }
+
+    @Test
+    fun testUpdateNonExistentPost() {
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(id = 999, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Пост с несуществующим ID", friendsOnly = false)
+        val result = WallService.update(post)
+
+        assertFalse(result, "Обновление поста с несуществующим ID должно вернуть false")
+    }
+
+    @Test
+    fun testAddWithEmptyText() {
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "", friendsOnly = false)
+        val addedPost = WallService.add(post)
+
+        assertEquals("", addedPost.text, "Текст поста должен остаться пустым")
+    }
 }
-
-@Test
-fun testAddWithZeroId() {
-    val post = Post(id = 0, ownerId = 100, fromId = 200, date = 1663157200, text = "Пост с id 0")
-    val addedPost = WallService.add(post)
-
-    assertTrue(addedPost.id > 0, "ID поста должен быть уникальным и больше 0")
-}
-
-@Test
-fun testUpdateNonExistentPost() {
-    val post = Post(id = 999, ownerId = 100, fromId = 200, date = 1663157200, text = "Пост с несуществующим ID")
-    val result = WallService.update(post)
-
-    assertFalse(result, "Обновление поста с несуществующим ID должно вернуть false")
-}
-
-@Test
-fun testAddWithEmptyText() {
-    val post = Post(id = 0, ownerId = 100, fromId = 200, date = 1663157200, text = "")
-    val addedPost = WallService.add(post)
-
-    assertTrue(addedPost.text.isEmpty(), "Текст поста должен остаться пустым")
-}
-
-
-
