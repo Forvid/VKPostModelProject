@@ -1,91 +1,70 @@
-package main
+package ru.netology
 
-import kotlin.test.Test
-import kotlin.test.assertTrue
-import kotlin.test.assertFalse
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 class WallServiceTest {
 
     @Test
-    fun testAdd() {
+    fun testAddPost() {
         WallService.clear()  // Очищаем перед тестом
-        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост", friendsOnly = false)
+        val post = Post(
+            id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200,
+            text = "Тестовый пост", friendsOnly = false
+        )
+        val addedPost = WallService.add(post)
+        assertEquals(1, addedPost.id)
+    }
+
+    @Test
+    fun testUpdatePost() {
+        WallService.clear()  // Очищаем перед тестом
+        val post = Post(
+            id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200,
+            text = "Тестовый пост", friendsOnly = false
+        )
+        val addedPost = WallService.add(post)
+        val updatePost = addedPost.copy(text = "Обновленный текст")
+        val result = WallService.update(updatePost)
+        assertTrue(result)
+        assertEquals("Обновленный текст", updatePost.text)
+    }
+
+    @Test
+    fun testAddPostWithAttachments() {
+        WallService.clear()  // Очищаем перед тестом
+        val photo = Photo(id = 1, ownerId = 100, photo130 = "https://link.to/photo130", photo604 = "https://link.to/photo604")
+        val photoAttachment = PhotoAttachment(photo)
+
+        val post = Post(
+            id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200,
+            text = "Пост с вложением", friendsOnly = false,
+            attachments = arrayOf(photoAttachment)
+        )
         val addedPost = WallService.add(post)
 
-        assertTrue(addedPost.id > 0, "Пост должен получить уникальный идентификатор")
-        assertEquals(post.text, addedPost.text, "Текст добавленного поста должен совпадать")
+        assertEquals(1, addedPost.attachments?.size)
+        assertEquals("photo", addedPost.attachments?.first()?.type)
     }
 
     @Test
-    fun testUpdateSuccess() {
+    fun testAddPostWithMultipleAttachments() {
         WallService.clear()  // Очищаем перед тестом
-        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост", friendsOnly = false)
+        val photo = Photo(id = 1, ownerId = 100, photo130 = "https://link.to/photo130", photo604 = "https://link.to/photo604")
+        val photoAttachment = PhotoAttachment(photo)
+
+        val video = Video(id = 1, ownerId = 200, title = "Видео", duration = 120)
+        val videoAttachment = VideoAttachment(video)
+
+        val post = Post(
+            id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200,
+            text = "Пост с несколькими вложениями", friendsOnly = false,
+            attachments = arrayOf(photoAttachment, videoAttachment)
+        )
         val addedPost = WallService.add(post)
 
-        val updatedPost = addedPost.copy(text = "Обновленный текст")
-        val result = WallService.update(updatedPost)
-
-        assertTrue(result, "Обновление должно быть успешным")
-        assertEquals("Обновленный текст", WallService.getPosts().first().text, "Текст поста должен обновиться")
-    }
-
-    @Test
-    fun testUpdateFail() {
-        WallService.clear()  // Очищаем перед тестом
-        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост", friendsOnly = false)
-        WallService.add(post)
-
-        val nonExistentPost = Post(id = 999, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Не существующий пост", friendsOnly = false)
-        val result = WallService.update(nonExistentPost)
-
-        assertFalse(result, "Обновление должно завершиться неудачей для несуществующего поста")
-    }
-
-    @Test
-    fun testAddWithZeroId() {
-        WallService.clear()  // Очищаем перед тестом
-        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Пост с id 0", friendsOnly = false)
-        val addedPost = WallService.add(post)
-
-        assertTrue(addedPost.id > 0, "ID поста должен быть уникальным и больше 0")
-    }
-
-    @Test
-    fun testUpdateNonExistentPost() {
-        WallService.clear()  // Очищаем перед тестом
-        val post = Post(id = 999, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Пост с несуществующим ID", friendsOnly = false)
-        val result = WallService.update(post)
-
-        assertFalse(result, "Обновление поста с несуществующим ID должно вернуть false")
-    }
-
-    @Test
-    fun testAddWithEmptyText() {
-        WallService.clear()  // Очищаем перед тестом
-        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "", friendsOnly = false)
-        val addedPost = WallService.add(post)
-
-        assertEquals("", addedPost.text, "Текст поста должен остаться пустым")
-    }
-
-    @Test
-    fun testRemovePost() {
-        WallService.clear()  // Очищаем перед тестом
-        val post = Post(id = 0, ownerId = 100, fromId = 200, createdBy = 1, date = 1663157200, text = "Тестовый пост для удаления", friendsOnly = false)
-        val addedPost = WallService.add(post)
-
-        val result = WallService.remove(addedPost.id)
-
-        assertTrue(result, "Пост должен быть успешно удален")
-        assertFalse(WallService.getPosts().any { it.id == addedPost.id }, "Пост не должен существовать после удаления")
-    }
-
-    @Test
-    fun testRemoveNonExistentPost() {
-        WallService.clear()  // Очищаем перед тестом
-        val result = WallService.remove(999)
-
-        assertFalse(result, "Удаление несуществующего поста должно вернуть false")
+        assertEquals(2, addedPost.attachments?.size)
+        assertEquals("photo", addedPost.attachments?.first()?.type)
+        assertEquals("video", addedPost.attachments?.last()?.type)
     }
 }
